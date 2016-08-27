@@ -1,0 +1,7 @@
+{
+  "lambda": {
+    "role": "slackbot-repo-info-executor",
+    "name": "slackbot-repo-info",
+    "region": "us-east-1"
+  }
+}

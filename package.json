@@ -1,0 +1,14 @@
+{
+  "name": "slackbot-repo-info",
+  "version": "0.0.1",
+  "description": "A bot that listens to Slack and gives information about linked git repos.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tom fletcher",
+  "license": "MIT",
+  "dependencies": {
+    
+  }
+}
