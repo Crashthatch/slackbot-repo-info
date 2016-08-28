@@ -9,6 +9,14 @@
   "author": "tom fletcher",
   "license": "MIT",
   "dependencies": {
-    
+    "aws-sdk": "^2.5.3",
+    "bluebird": "^3.4.3",
+    "claudia-api-builder": "^1.6.0",
+    "request": "^2.74.0",
+    "request-promise": "^4.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Crashthatch/slackbot-repo-info"
   }
 }

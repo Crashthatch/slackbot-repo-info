@@ -3,5 +3,9 @@
     "role": "slackbot-repo-info-executor",
     "name": "slackbot-repo-info",
     "region": "us-east-1"
+  },
+  "api": {
+    "id": "18f1xn8emb",
+    "module": "app"
   }
 }
