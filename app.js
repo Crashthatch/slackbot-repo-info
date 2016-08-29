@@ -4,8 +4,6 @@ const https = require('https');
 const Promise = require('bluebird');
 const rp = require('request-promise');
 
-
-
 const services = AWS.Service._serviceMap;
 const serviceMap = [];
 for (var service in AWS.Service._serviceMap) {
@@ -20,7 +18,7 @@ module.exports = api;
 //The step in the oAuth flow where the user is sent to this endpoint, with a code in the querystring, and we take that code and exchange it for an access_token with the Slack API.
 api.get('/slack/oauth', function(req) {
 
-  return rp.get('https://slack.com/api/oauth.access?client_id=' + slackClientId + '&client_secret=' + slackClientSecret + '&code=' + req.queryString.code)
+  return rp.get('https://slack.com/api/oauth.access?client_id=' + req.env.slackClientId + '&client_secret=' + req.env.slackClientSecret + '&code=' + req.queryString.code)
     .then( function(response){ //The Slack Call returns 200 even if it failed. So check for that.
       response = JSON.parse(response);
       if( response.ok ){
@@ -61,10 +59,10 @@ api.get('/slack/oauth', function(req) {
 });
 
 api.post('/slack/newMessage', function(req){
-  console.log(JSON.stringify(req));
+  //console.log(JSON.stringify(req));
 
   var postBody = req.body;
-  if( postBody.token != slackVerificationToken ){
+  if( postBody.token != req.env.slackVerificationToken ){
     return "Token did not match the verification token for this app. Did someone other than Slack send this request?";
   }
 
@@ -83,59 +81,46 @@ api.post('/slack/newMessage', function(req){
     var repoName = directoryParts[2];
 
 
-    //Make call to libraries.io to get details about repo.
-    //console.log("https://libraries.io/api/github/"+repoOwner+"/"+repoName+"/dependencies?api_key="+librariesApiKey);
-    //https.get("https://libraries.io/api/github/"+repoOwner+"/"+repoName+"/dependencies?api_key="+librariesApiKey, function(librariesIoResponse){
-    https.get({
-      host: "api.github.com",
-      path: "/repos/"+repoOwner+"/"+repoName+"?client_id="+githubClientId+"&client_secret="+githubClientSecret,
+    //Make call to get details about repo.
+    //console.log("https://libraries.io/api/github/"+repoOwner+"/"+repoName+"/dependencies?api_key="+req.env.librariesApiKey);
+    //https.get("https://libraries.io/api/github/"+repoOwner+"/"+repoName+"/dependencies?api_key="+req.env.librariesApiKey, function(librariesIoResponse){
+    var message;
+    return rp.get({
+      url: "https://api.github.com/repos/"+repoOwner+"/"+repoName+"?client_id="+req.env.githubClientId+"&client_secret="+req.env.githubClientSecret,
       headers: {'user-agent': 'RepoInfo/0.0.1'}
-    }, function(githubApiResponse){
+    })
+    .then( function(githubApiResponse) {
 
-      var githubApiBody = '';
-      githubApiResponse.on('data', function(chunk) {
-        githubApiBody += chunk;
-      });
-      githubApiResponse.on('end', function() {
-        console.log(githubApiBody);
-        var githubApiData = JSON.parse(githubApiBody);
-        console.log('Recieved from libraries.io: '+githubApiData);
+      console.log(githubApiResponse);
+      var githubApiData = JSON.parse(githubApiResponse);
+      console.log('Recieved from github: ' + githubApiData);
 
 
-        var message = "Stars: "+githubApiData.stargazers_count+", licence: "+githubApiData.license+", last push: "+githubApiData.pushed_at;
+      message = "*"+repoOwner+"/"+repoName+"*: \n" + githubApiData.stargazers_count + ":star:, licence: " + githubApiData.license + ", last push: " + githubApiData.pushed_at;
 
-        //Grab all bot_user_tokens for this team (generated and stored in DynamoDB when the bot was added to this team).
-        //There may be more than 1 if multiple users have authorized the bot.
-        const DBDocClient = new AWS.DynamoDB.DocumentClient();
+      //Grab all bot_user_tokens for this team (generated and stored in DynamoDB when the bot was added to this team).
+      //There may be more than 1 if multiple users have authorized the bot.
+      const DBDocClient = Promise.promisifyAll(new AWS.DynamoDB.DocumentClient());
 
-        DBDocClient.query({
-          TableName: 'RepoInfoSlackKeys',
-          KeyConditionExpression: 'team_id = :team_id',
-          ExpressionAttributeValues: {
-            ':team_id': postBody.team_id
-          }
-        }, function(err, dynamoDbResponse){
-          if( err ){
-            console.error(err);
-            return;
-          }
-          //Use Slack's Web-API to post a message.
-          https.get('https://slack.com/api/chat.postMessage?token='+dynamoDbResponse.Items[0].bot.bot_access_token+'&channel='+postBody.event.channel+'&text='+encodeURIComponent(message), function(res) {
-            var body = '';
-            res.on('data', function(chunk) {
-              body += chunk;
-            });
-            res.on('end', function() {
-              console.log('Recieved from chat.postMessage: '+body);
-            });
-          }).on('error', function(e) {
-            console.log("Got error from chat.postMessage: " + e.message);
-          });
-          return;
-        });
-      });
+      return DBDocClient.queryAsync({
+        TableName: 'RepoInfoSlackKeys',
+        KeyConditionExpression: 'team_id = :team_id',
+        ExpressionAttributeValues: {
+          ':team_id': postBody.team_id
+        }
+      })
+    })
+    .then( function(dynamoDbResponse){
+      //Use Slack's Web-API to post a message.
+      return rp.get('https://slack.com/api/chat.postMessage?token='+dynamoDbResponse.Items[0].bot.bot_access_token+'&channel='+postBody.event.channel+'&text='+encodeURIComponent(message));
+    })
+    .then( function(postMessageResponse){
+      console.log('Successfully sent message to Slack channel: ' + message);
+      return postMessageResponse;
+    })
+    .catch( function(err){
+      console.log(err);
+      throw "Error: "+err;
     });
-
-
   }
 });
