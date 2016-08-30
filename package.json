@@ -4,7 +4,7 @@
   "description": "A bot that listens to Slack and gives information about linked git repos.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node jasmine-runner.js"
   },
   "author": "tom fletcher",
   "license": "MIT",
@@ -18,5 +18,9 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/Crashthatch/slackbot-repo-info"
+  },
+  "devDependencies": {
+    "jasmine": "^2.4.1",
+    "jasmine-spec-reporter": "^2.7.0"
   }
 }
