@@ -18,12 +18,14 @@ TODO (Some using Libraries.io, maybe hook into gemnasium?):
 * Issues / Pull requests closed / opened recently
 * Transitive licensing issues?
 * Github badges / shields: eg. Travis' "Build passing" or the "Dependencies up-to-date" etc.
-* Security issues? Known bad versions of dependencies?
+* Security issues? Known bad versions of dependencies? [nodesecurity](https://nodesecurity.io/)
 * Avg. time to fix when a vulnerability becomes known?
 * Score each area and colour it red/green in the Slack window with formatting
 * Code-Climate score?
 * Overall health rating? Some function of the above fields.
-* A graph of health-ratings? A bad "red" dependency colours the tree that depends on it? 
+* A graph of health-ratings? A bad "red" dependency colours the tree that depends on it?
+* "Star on Github" button 
+* Test coverage (integrate with travis?)
 
 See [gorillamania/repo-health](https://github.com/gorillamania/repo-health), [repocheck](http://repocheck.com/), [gemnasium](https://gemnasium.com) and [npmCompare](https://npmcompare.com/compare/jasmine,mocha) for more ideas.
 
@@ -39,7 +41,7 @@ And [set up your AWS Credentials](https://claudiajs.com/tutorials/installing.htm
     
 To deploy to AWS Lambda / API Gateway:
 
-    claudia create --region us-east-1
+    claudia create --region us-east-1 --api-module app
     
 [Create a new Slack app](https://api.slack.com/apps/) . Use the URL claudia gave you in the last step, plus /slack/oauth as the "Request URL". (eg. https://123456789.execute-api.us-east-1.amazonaws.com/latest/slack/oauth)
 
@@ -61,6 +63,8 @@ In your slack app settings, go to [event subscriptions](https://api.slack.com/ap
 * message.mpim
 
 Modify the IAM role Claudia created to have read/write permissions for DynamoDB and create a table called "RepoInfoSlackKeys" with the primary index on team_id, user_id. This is where we store slack auth keys when a new user/team adds the repo-info app.
+TODO: Use --policies flag to claudia create above to do this automatically (See http://www.marcusoft.net/2016/03/aws-lambda-part-ii-storing-stuff.html)
+ 
 
 Use the [Slack button creator](https://api.slack.com/docs/slack-button) or edit the code below- insert your app's client_id- to create a button that users can press to add this SlackBot to their own teams and channels.
 
@@ -79,7 +83,7 @@ Slack Button code:
 
 Click this button and complete the oAuth process, selecting a slack team & channel that the bot will be added to. If you did not request the channels:history scope, make sure to /invite the bot to a #channel.
 
-Now paste a link to a github repository into the slack channel, and the bot should reply with info about the linked repository.
+To test, paste a link to a github repository into the slack channel, and the bot should reply with info about the linked repository.
 
 ##Debugging
 Production logs are available through the [Cloudwatch console](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logs:). Select your lambda function log-group and the latest deployment and look for errors.
@@ -89,3 +93,13 @@ To run tests locally (useful while developing):
 
     npm install
     npm test
+    
+##Contributing
+
+* Fork
+* Make changes
+* Add tests for new behaviour
+* Run tests
+* Test manually by pushing to lambda (we can't write Jasmine tests for this)
+* Commit
+* Open Pull-Request
