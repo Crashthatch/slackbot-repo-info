@@ -17,7 +17,7 @@ TODO (Some using Libraries.io, maybe hook into gemnasium?):
 * Number of Transitive dependencies (how big is the dependency tree?)
 * Issues / Pull requests closed / opened recently
 * Transitive licensing issues?
-* Github badges / shields: eg. Travis' "Build passing" or the "Dependencies up-to-date" etc.
+* Github badges / shields: eg. Travis' "Build passing" or the "Dependencies up-to-date" etc. Just scrape the readme for these?
 * Security issues? Known bad versions of dependencies? [nodesecurity](https://nodesecurity.io/)
 * Avg. time to fix when a vulnerability becomes known?
 * Score each area and colour it red/green in the Slack window with formatting
