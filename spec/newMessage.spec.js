@@ -4,16 +4,31 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const rp = require('request-promise');
 const Promise = require('bluebird');
+const _ = require('lodash');
 var app = require('../app.js');
-var testEnv = {
-  slackClientId: 'SlackAppId',
-  slackClientSecret: 'SlackAppSecret',
-  slackVerificationToken: 'SlackAppVerificationToken',
 
-  librariesApiKey: 'librariesIoApiKey',
+var testEvent = {
+  context: {
+    path: '/slack/newMessage',
+    method: 'POST'
+  },
+  body: {
+    'token': 'SlackAppVerificationToken',
+    'type': 'message',
+    'event': {
+      text: 'http://github.com/testUser/testRepo'
+    }
+  },
+  env: {
+    slackClientId: 'SlackAppId',
+    slackClientSecret: 'SlackAppSecret',
+    slackVerificationToken: 'SlackAppVerificationToken',
 
-  githubClientId: 'githubClientId',
-  githubClientSecret: 'gitHubClientSecret'
+    librariesApiKey: 'librariesIoApiKey',
+
+    githubClientId: 'githubClientId',
+    githubClientSecret: 'gitHubClientSecret'
+  }
 };
 
 var githubRepoResponse = fs.readFileSync('spec/githubRepoResponse.json').toString();
@@ -68,36 +83,22 @@ describe('Slack', function() {
 
     it('returns challenge if type is url_verification', function () {
       app.router({
-        context: {
-          path: '/slack/newMessage',
-          method: 'POST'
-        },
+        context: testEvent.context,
         body: {
           'type': 'url_verification',
           'challenge': 'I_SHOULD_BE_ECHOED',
           'token': 'SlackAppVerificationToken'
         },
-        env: testEnv
+        env: testEvent.env
       }, lambdaContextSpy);
 
       expect(lambdaContextSpy.done).toHaveBeenCalledWith(null, 'I_SHOULD_BE_ECHOED');
     });
 
     it('Calls the Github API to get details for the right repo.', (done) => {
-      var routerPromise = app.router({
-        context: {
-          path: '/slack/newMessage',
-          method: 'POST'
-        },
-        body: {
-          'token': 'SlackAppVerificationToken',
-          'type': 'message',
-          'event': {
-            text: 'http://github.com/someUser/someRepo'
-          }
-        },
-        env: testEnv
-      }, lambdaContextSpy);
+      var testEventModified = _.cloneDeep(testEvent);
+      testEventModified.body.event.text = 'http://github.com/someUser/someRepo';
+      var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
         expect(getAjaxSpy).toHaveBeenCalled();
@@ -107,20 +108,9 @@ describe('Slack', function() {
     });
 
     it('Recognises https:// github repos.', (done) => {
-      var routerPromise = app.router({
-        context: {
-          path: '/slack/newMessage',
-          method: 'POST'
-        },
-        body: {
-          'token': 'SlackAppVerificationToken',
-          'type': 'message',
-          'event': {
-            text: 'https://github.com/testUser/testRepo'
-          }
-        },
-        env: testEnv
-      }, lambdaContextSpy);
+      var testEventModified = _.cloneDeep(testEvent);
+      testEventModified.body.event.text = 'https://github.com/testUser/testRepo';
+      var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
         expect(getAjaxSpy).toHaveBeenCalled();
@@ -130,20 +120,9 @@ describe('Slack', function() {
     });
 
     it('Recognises github repos without http:// at all.', (done) => {
-      var routerPromise = app.router({
-        context: {
-          path: '/slack/newMessage',
-          method: 'POST'
-        },
-        body: {
-          'token': 'SlackAppVerificationToken',
-          'type': 'message',
-          'event': {
-            text: 'github.com/testUser/testRepo'
-          }
-        },
-        env: testEnv
-      }, lambdaContextSpy);
+      var testEventModified = _.cloneDeep(testEvent);
+      testEventModified.body.event.text = 'github.com/testUser/testRepo';
+      var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
         expect(getAjaxSpy).toHaveBeenCalled();
@@ -153,20 +132,9 @@ describe('Slack', function() {
     });
 
     it('Parses a github repo from the middle of a slack message.', (done) => {
-      var routerPromise = app.router({
-        context: {
-          path: '/slack/newMessage',
-          method: 'POST'
-        },
-        body: {
-          'token': 'SlackAppVerificationToken',
-          'type': 'message',
-          'event': {
-            text: 'Hey everyone this is \"my\" more \n complicated message that also references a github repo. http://github.com/testUser/testRepo/blob/master/fonts/ionicons.ttf'
-          }
-        },
-        env: testEnv
-      }, lambdaContextSpy);
+      var testEventModified = _.cloneDeep(testEvent);
+      testEventModified.body.event.text = 'Hey everyone this is \"my\" more \n complicated message that also references a github repo. http://github.com/testUser/testRepo/blob/master/fonts/ionicons.ttf';
+      var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
         expect(getAjaxSpy).toHaveBeenCalled();
@@ -176,20 +144,7 @@ describe('Slack', function() {
     });
 
     it('Tries to make post to slack, given appropriate responses from github, dynamoDb etc.', (done) => {
-      var routerPromise = app.router({
-        context: {
-          path: '/slack/newMessage',
-          method: 'POST'
-        },
-        body: {
-          'token': 'SlackAppVerificationToken',
-          'type': 'message',
-          'event': {
-            text: 'http://github.com/testUser/testRepo'
-          }
-        },
-        env: testEnv
-      }, lambdaContextSpy);
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
 
       //Wait for our lambda function to complete.
       routerPromise.then( function(){
@@ -198,6 +153,26 @@ describe('Slack', function() {
         done();
       })
 
+    });
+
+    it('messagePosted Contains the number of stars the repo has.', (done) => {
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+      //Wait for our lambda function to complete.
+      routerPromise.then( function(){
+        expect(messagePosted).toMatch(/806412/);
+        done();
+      })
+    });
+
+    it('messagePosted uses friendly dates.', (done) => {
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+      //Wait for our lambda function to complete.
+      routerPromise.then( function(){
+        expect(messagePosted).toMatch(/years ago/);
+        done();
+      })
     });
   });
 });
