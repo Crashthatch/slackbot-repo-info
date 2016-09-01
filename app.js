@@ -97,19 +97,24 @@ api.post('/slack/newMessage', function(req){
 
       message = //">>> *"+repoFullName+"*: \n" +
         githubApiData.stargazers_count + ":star:   " +
-        githubApiData.watchers_count+" :eye:   " +
-        githubApiData.forks_count+" :fork_and_knife: " +
-        //"licence: " + githubApiData.license + ", " +
-        "Created: " + moment(githubApiData.created_at).fromNow()+", " +
+        githubApiData.watchers_count + " :eye:   " +
+        githubApiData.forks_count + " :fork_and_knife: " +
+        "Created: " + moment(githubApiData.created_at).fromNow() + ", " +
         "Last push: " + moment(githubApiData.pushed_at).fromNow();
 
       //Fallback message without emojis for readers that can't display formatting (eg. IRC).
-      messageFallback = repoFullName+" has "+
-          githubApiData.stargazers_count+" stars, "+
-          githubApiData.watchers_count+" watchers " +
-          "and "+githubApiData.forks_count+" forks. " +
-          "It was created "+moment(githubApiData.created_at).fromNow()+
-          " and last pushed to "+moment(githubApiData.pushed_at).fromNow();
+      messageFallback = repoFullName + " has " +
+        githubApiData.stargazers_count + " stars, " +
+        githubApiData.watchers_count + " watchers " +
+        "and " + githubApiData.forks_count + " forks. " +
+        "It was created " + moment(githubApiData.created_at).fromNow() +
+        " and last pushed to " + moment(githubApiData.pushed_at).fromNow();
+
+      return rp.get("https://libraries.io/api/github/"+repoOwner+"/"+repoName+"/dependencies?api_key="+req.env.librariesApiKey);
+    })
+    .then(function(librariesIoResponse){
+      var librariesIoResponseData = JSON.parse(librariesIoResponse);
+      message += "\n License: "+librariesIoResponseData.license;
 
       //Grab all bot_user_tokens for this team (generated and stored in DynamoDB when the bot was added to this team).
       //There may be more than 1 if multiple users have authorized the bot.

@@ -32,6 +32,7 @@ var testEvent = {
 };
 
 var githubRepoResponse = fs.readFileSync('spec/githubRepoResponse.json').toString();
+var librariesIoDependenciesResponse = fs.readFileSync('spec/librariesIoDependenciesResponse.json').toString();
 
 
 var lambdaContextSpy, getAjaxSpy, postAjaxSpy, dynamoDbSpy, attachmentPosted;
@@ -45,6 +46,9 @@ beforeEach(function() {
 
     if (urlRequested.match(/^https:\/\/api\.github\.com\/repos/)) {
       return Promise.resolve(githubRepoResponse);
+    }
+    else if(urlRequested.match(/^https:\/\/libraries.io\/api\/github\/.*\/dependencies/)){
+      return Promise.resolve(librariesIoDependenciesResponse);
     }
     else{
       return Promise.reject("Mock does not know how to respond to "+urlRequested);
@@ -184,6 +188,16 @@ describe('Slack', function() {
       })
     });
 
+    it('attachmentPosted.text Contains the license.', (done) => {
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+      //Wait for our lambda function to complete.
+      routerPromise.then( function(){
+        expect(attachmentPosted.text).toMatch(/OtherLicense/);
+        done();
+      })
+    });
+
     it('attachmentPosted.text uses friendly dates.', (done) => {
       var routerPromise = app.router(testEvent, lambdaContextSpy);
 
@@ -193,45 +207,45 @@ describe('Slack', function() {
         done();
       })
     });
-  });
 
-  it('rejects the promise if slack chat.postMessage responds 200 "not ok".', (done) => {
-    //Override rp.post to return an error from Slack.
-    var failPostAjaxSpy = rp.post = jasmine.createSpy().and.callFake(function (urlRequested, postFormData) {
-      if (urlRequested.match(/https:\/\/slack\.com\/api\/chat\.postMessage/)) {
-        return Promise.resolve('{"ok": false, "error": "Authentication Error"}');
-      }
-      else{
-        return Promise.reject("Mock does not know how to respond to "+urlRequested);
-      }
+    it('rejects the promise if slack chat.postMessage responds 200 "not ok".', (done) => {
+      //Override rp.post to return an error from Slack.
+      var failPostAjaxSpy = rp.post = jasmine.createSpy().and.callFake(function (urlRequested, postFormData) {
+        if (urlRequested.match(/https:\/\/slack\.com\/api\/chat\.postMessage/)) {
+          return Promise.resolve('{"ok": false, "error": "Authentication Error"}');
+        }
+        else{
+          return Promise.reject("Mock does not know how to respond to "+urlRequested);
+        }
+      });
+
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+      routerPromise.then( function(routerResponse){
+        expect(lambdaContextSpy.done).toHaveBeenCalled();
+        expect(lambdaContextSpy.done).not.toHaveBeenCalledWith(null); //not null as the first argument means "error", and API gateway will respond 500.
+        done();
+      });
     });
 
-    var routerPromise = app.router(testEvent, lambdaContextSpy);
+    it('rejects the promise if slack chat.postMessage responds 500 error.', (done) => {
+      //Override rp.post to return an error from Slack.
+      var failPostAjaxSpy = rp.post = jasmine.createSpy().and.callFake(function (urlRequested, postFormData) {
+        if (urlRequested.match(/https:\/\/slack\.com\/api\/chat\.postMessage/)) {
+          return Promise.reject('connection error');
+        }
+        else{
+          return Promise.reject("Mock does not know how to respond to "+urlRequested);
+        }
+      });
 
-    routerPromise.then( function(routerResponse){
-      expect(lambdaContextSpy.done).toHaveBeenCalled();
-      expect(lambdaContextSpy.done).not.toHaveBeenCalledWith(null); //not null as the first argument means "error", and API gateway will respond 500.
-      done();
-    });
-  });
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
 
-  it('rejects the promise if slack chat.postMessage responds 500 error.', (done) => {
-    //Override rp.post to return an error from Slack.
-    var failPostAjaxSpy = rp.post = jasmine.createSpy().and.callFake(function (urlRequested, postFormData) {
-      if (urlRequested.match(/https:\/\/slack\.com\/api\/chat\.postMessage/)) {
-        return Promise.reject('connection error');
-      }
-      else{
-        return Promise.reject("Mock does not know how to respond to "+urlRequested);
-      }
-    });
-
-    var routerPromise = app.router(testEvent, lambdaContextSpy);
-
-    routerPromise.then( function(routerResponse){
-      expect(lambdaContextSpy.done).toHaveBeenCalled();
-      expect(lambdaContextSpy.done).not.toHaveBeenCalledWith(null); //not null as the first argument means "error", and API gateway will respond 500.
-      done();
+      routerPromise.then( function(routerResponse){
+        expect(lambdaContextSpy.done).toHaveBeenCalled();
+        expect(lambdaContextSpy.done).not.toHaveBeenCalledWith(null); //not null as the first argument means "error", and API gateway will respond 500.
+        done();
+      });
     });
   });
 });
