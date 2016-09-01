@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 
 const https = require('https');
+const moment = require('moment');
 const Promise = require('bluebird');
 const rp = require('request-promise');
 
@@ -76,7 +77,6 @@ api.post('/slack/newMessage', function(req){
 
     //Extract the linked repo's path.
     var directoryParts = postBody.event.text.match(/github\.com\/([A-Za-z0-9_\.-]*)\/([A-Za-z0-9_\.-]*)/);
-    console.log(directoryParts);
     var repoOwner = directoryParts[1];
     var repoName = directoryParts[2];
 
@@ -91,12 +91,18 @@ api.post('/slack/newMessage', function(req){
     })
     .then( function(githubApiResponse) {
 
-      console.log(githubApiResponse);
+      //console.log(githubApiResponse);
       var githubApiData = JSON.parse(githubApiResponse);
-      console.log('Recieved from github: ' + githubApiData);
+      //console.log('Received from github: ' + githubApiData);
 
 
-      message = "*"+repoOwner+"/"+repoName+"*: \n" + githubApiData.stargazers_count + ":star:, licence: " + githubApiData.license + ", last push: " + githubApiData.pushed_at;
+      message = ">>> *"+repoOwner+"/"+repoName+"*: \n" +
+        githubApiData.stargazers_count + ":star:   " +
+        githubApiData.watchers_count+" :eye:   " +
+        githubApiData.forks_count+" :fork_and_knife: " +
+        //"licence: " + githubApiData.license + ", " +
+        "Created: " + moment(githubApiData.created_at).fromNow()+", " +
+        "Last push: " + moment(githubApiData.pushed_at).fromNow();
 
       //Grab all bot_user_tokens for this team (generated and stored in DynamoDB when the bot was added to this team).
       //There may be more than 1 if multiple users have authorized the bot.
