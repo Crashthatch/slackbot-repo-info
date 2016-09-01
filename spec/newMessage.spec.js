@@ -16,7 +16,7 @@ var testEvent = {
     'token': 'SlackAppVerificationToken',
     'type': 'message',
     'event': {
-      text: 'http://github.com/testUser/testRepo'
+      text: 'http://github.com/octocat/hello-world'
     }
   },
   env: {
@@ -34,11 +34,11 @@ var testEvent = {
 var githubRepoResponse = fs.readFileSync('spec/githubRepoResponse.json').toString();
 
 
-var lambdaContextSpy, getAjaxSpy, dynamoDbSpy, messagePosted;
+var lambdaContextSpy, getAjaxSpy, postAjaxSpy, dynamoDbSpy, attachmentPosted;
 beforeEach(function() {
   lambdaContextSpy = jasmine.createSpyObj('lambdaContext', ['done']);
 
-  messagePosted = null;
+  attachmentPosted = null;
   //Mock AJAX responses...
   getAjaxSpy = rp.get = jasmine.createSpy().and.callFake(function (requestGetArgument) {
     var urlRequested = ( typeof requestGetArgument == "string") ? requestGetArgument : requestGetArgument.url;
@@ -46,12 +46,22 @@ beforeEach(function() {
     if (urlRequested.match(/^https:\/\/api\.github\.com\/repos/)) {
       return Promise.resolve(githubRepoResponse);
     }
-    else if (urlRequested.match(/https:\/\/slack\.com\/api\/chat\.postMessage/)) {
-      var queryParams = urlRequested.match(/https:\/\/slack\.com\/api\/chat\.postMessage.*text=(.*)(&|$)/);
-      messagePosted = decodeURIComponent(queryParams[1]);
-      return Promise.resolve("OK"); //TODO: Replace this with what Slack actually responds with.
+    else{
+      return Promise.reject("Mock does not know how to respond to "+urlRequested);
     }
   });
+
+  postAjaxSpy = rp.post = jasmine.createSpy().and.callFake(function (urlRequested, postFormData) {
+    if (urlRequested.match(/https:\/\/slack\.com\/api\/chat\.postMessage/)) {
+      var regexMatch = postFormData.form.match(/attachments=(.*)(&|$)/);
+      attachmentPosted = JSON.parse(regexMatch[1])[0];
+      return Promise.resolve('{"ok": true}');
+    }
+    else{
+      return Promise.reject("Mock does not know how to respond to "+urlRequested);
+    }
+  });
+
   dynamoDbSpy = AWS.DynamoDB.DocumentClient = jasmine.createSpy().and.callFake(function () {
     return {
       queryAsync: function () {
@@ -97,48 +107,48 @@ describe('Slack', function() {
 
     it('Calls the Github API to get details for the right repo.', (done) => {
       var testEventModified = _.cloneDeep(testEvent);
-      testEventModified.body.event.text = 'http://github.com/someUser/someRepo';
+      testEventModified.body.event.text = 'http://github.com/octocat/hello-world';
       var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
         expect(getAjaxSpy).toHaveBeenCalled();
-        expect(getAjaxSpy.calls.first().args[0].url).toMatch(/^https:\/\/api\.github\.com\/repos\/someUser\/someRepo\?/);
+        expect(getAjaxSpy.calls.first().args[0].url).toMatch(/^https:\/\/api\.github\.com\/repos\/octocat\/hello-world\?/);
         done();
       });
     });
 
     it('Recognises https:// github repos.', (done) => {
       var testEventModified = _.cloneDeep(testEvent);
-      testEventModified.body.event.text = 'https://github.com/testUser/testRepo';
+      testEventModified.body.event.text = 'https://github.com/octocat/hello-world';
       var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
         expect(getAjaxSpy).toHaveBeenCalled();
-        expect(getAjaxSpy.calls.first().args[0].url).toMatch(/^https:\/\/api\.github\.com\/repos\/testUser\/testRepo\?/);
+        expect(getAjaxSpy.calls.first().args[0].url).toMatch(/^https:\/\/api\.github\.com\/repos\/octocat\/hello-world\?/);
         done();
       });
     });
 
     it('Recognises github repos without http:// at all.', (done) => {
       var testEventModified = _.cloneDeep(testEvent);
-      testEventModified.body.event.text = 'github.com/testUser/testRepo';
+      testEventModified.body.event.text = 'github.com/octocat/hello-world';
       var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
         expect(getAjaxSpy).toHaveBeenCalled();
-        expect(getAjaxSpy.calls.first().args[0].url).toMatch(/^https:\/\/api\.github\.com\/repos\/testUser\/testRepo\?/);
+        expect(getAjaxSpy.calls.first().args[0].url).toMatch(/^https:\/\/api\.github\.com\/repos\/octocat\/hello-world\?/);
         done();
       });
     });
 
     it('Parses a github repo from the middle of a slack message.', (done) => {
       var testEventModified = _.cloneDeep(testEvent);
-      testEventModified.body.event.text = 'Hey everyone this is \"my\" more \n complicated message that also references a github repo. http://github.com/testUser/testRepo/blob/master/fonts/ionicons.ttf';
+      testEventModified.body.event.text = 'Hey everyone this is \"my\" more \n complicated message that also references a github repo. http://github.com/octocat/hello-world/blob/master/fonts/ionicons.ttf';
       var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
         expect(getAjaxSpy).toHaveBeenCalled();
-        expect(getAjaxSpy.calls.first().args[0].url).toMatch(/^https:\/\/api\.github\.com\/repos\/testUser\/testRepo\?/);
+        expect(getAjaxSpy.calls.first().args[0].url).toMatch(/^https:\/\/api\.github\.com\/repos\/octocat\/hello-world\?/);
         done();
       });
     });
@@ -148,31 +158,80 @@ describe('Slack', function() {
 
       //Wait for our lambda function to complete.
       routerPromise.then( function(){
-        expect(lambdaContextSpy.done).toHaveBeenCalled();
-        expect(messagePosted).toMatch(/\*testUser\/testRepo\*.*/);
-        done();
-      })
-
-    });
-
-    it('messagePosted Contains the number of stars the repo has.', (done) => {
-      var routerPromise = app.router(testEvent, lambdaContextSpy);
-
-      //Wait for our lambda function to complete.
-      routerPromise.then( function(){
-        expect(messagePosted).toMatch(/806412/);
+        expect(postAjaxSpy).toHaveBeenCalled();
+        expect(attachmentPosted.title).toMatch(/octocat\/hello-world/i);
         done();
       })
     });
 
-    it('messagePosted uses friendly dates.', (done) => {
+    it('returns a success', (done) => {
       var routerPromise = app.router(testEvent, lambdaContextSpy);
 
       //Wait for our lambda function to complete.
       routerPromise.then( function(){
-        expect(messagePosted).toMatch(/years ago/);
+        expect(lambdaContextSpy.done).toHaveBeenCalledWith(null, "OK"); //null as first argument means "success" (and causes API gateway to respond 200).
         done();
       })
+    });
+
+    it('attachmentPosted.text Contains the number of stars the repo has.', (done) => {
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+      //Wait for our lambda function to complete.
+      routerPromise.then( function(){
+        expect(attachmentPosted.text).toMatch(/806412/);
+        done();
+      })
+    });
+
+    it('attachmentPosted.text uses friendly dates.', (done) => {
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+      //Wait for our lambda function to complete.
+      routerPromise.then( function(){
+        expect(attachmentPosted.text).toMatch(/years ago/);
+        done();
+      })
+    });
+  });
+
+  it('rejects the promise if slack chat.postMessage responds 200 "not ok".', (done) => {
+    //Override rp.post to return an error from Slack.
+    var failPostAjaxSpy = rp.post = jasmine.createSpy().and.callFake(function (urlRequested, postFormData) {
+      if (urlRequested.match(/https:\/\/slack\.com\/api\/chat\.postMessage/)) {
+        return Promise.resolve('{"ok": false, "error": "Authentication Error"}');
+      }
+      else{
+        return Promise.reject("Mock does not know how to respond to "+urlRequested);
+      }
+    });
+
+    var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+    routerPromise.then( function(routerResponse){
+      expect(lambdaContextSpy.done).toHaveBeenCalled();
+      expect(lambdaContextSpy.done).not.toHaveBeenCalledWith(null); //not null as the first argument means "error", and API gateway will respond 500.
+      done();
+    });
+  });
+
+  it('rejects the promise if slack chat.postMessage responds 500 error.', (done) => {
+    //Override rp.post to return an error from Slack.
+    var failPostAjaxSpy = rp.post = jasmine.createSpy().and.callFake(function (urlRequested, postFormData) {
+      if (urlRequested.match(/https:\/\/slack\.com\/api\/chat\.postMessage/)) {
+        return Promise.reject('connection error');
+      }
+      else{
+        return Promise.reject("Mock does not know how to respond to "+urlRequested);
+      }
+    });
+
+    var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+    routerPromise.then( function(routerResponse){
+      expect(lambdaContextSpy.done).toHaveBeenCalled();
+      expect(lambdaContextSpy.done).not.toHaveBeenCalledWith(null); //not null as the first argument means "error", and API gateway will respond 500.
+      done();
     });
   });
 });

@@ -80,11 +80,10 @@ api.post('/slack/newMessage', function(req){
     var repoOwner = directoryParts[1];
     var repoName = directoryParts[2];
 
-
     //Make call to get details about repo.
     //console.log("https://libraries.io/api/github/"+repoOwner+"/"+repoName+"/dependencies?api_key="+req.env.librariesApiKey);
     //https.get("https://libraries.io/api/github/"+repoOwner+"/"+repoName+"/dependencies?api_key="+req.env.librariesApiKey, function(librariesIoResponse){
-    var message;
+    var message, messageFallback, repoFullName;
     return rp.get({
       url: "https://api.github.com/repos/"+repoOwner+"/"+repoName+"?client_id="+req.env.githubClientId+"&client_secret="+req.env.githubClientSecret,
       headers: {'user-agent': 'RepoInfo/0.0.1'}
@@ -94,15 +93,23 @@ api.post('/slack/newMessage', function(req){
       //console.log(githubApiResponse);
       var githubApiData = JSON.parse(githubApiResponse);
       //console.log('Received from github: ' + githubApiData);
+      repoFullName = githubApiData.full_name;
 
-
-      message = ">>> *"+repoOwner+"/"+repoName+"*: \n" +
+      message = //">>> *"+repoFullName+"*: \n" +
         githubApiData.stargazers_count + ":star:   " +
         githubApiData.watchers_count+" :eye:   " +
         githubApiData.forks_count+" :fork_and_knife: " +
         //"licence: " + githubApiData.license + ", " +
         "Created: " + moment(githubApiData.created_at).fromNow()+", " +
         "Last push: " + moment(githubApiData.pushed_at).fromNow();
+
+      //Fallback message without emojis for readers that can't display formatting (eg. IRC).
+      messageFallback = repoFullName+" has "+
+          githubApiData.stargazers_count+" stars, "+
+          githubApiData.watchers_count+" watchers " +
+          "and "+githubApiData.forks_count+" forks. " +
+          "It was created "+moment(githubApiData.created_at).fromNow()+
+          " and last pushed to "+moment(githubApiData.pushed_at).fromNow();
 
       //Grab all bot_user_tokens for this team (generated and stored in DynamoDB when the bot was added to this team).
       //There may be more than 1 if multiple users have authorized the bot.
@@ -118,14 +125,37 @@ api.post('/slack/newMessage', function(req){
     })
     .then( function(dynamoDbResponse){
       //Use Slack's Web-API to post a message.
-      return rp.get('https://slack.com/api/chat.postMessage?token='+dynamoDbResponse.Items[0].bot.bot_access_token+'&channel='+postBody.event.channel+'&text='+encodeURIComponent(message));
+      var postFormData =
+        "token=" + encodeURIComponent(dynamoDbResponse.Items[0].bot.bot_access_token) +
+        "&channel=" + encodeURIComponent(postBody.event.channel) +
+        //"&text=" + encodeURIComponent(message) +
+        "&attachments="+JSON.stringify([
+          {
+            "fallback": messageFallback,
+            "title": repoFullName,
+            "title_link": "https://github.com/" + repoOwner + "/" + repoName,
+            "text": message,
+           // "image_url": "http://ichef-1.bbci.co.uk/news/660/cpsprodpb/978E/production/_90989783_doctorsstrike.jpg"
+          }
+        ]);
+      console.log('Posting message:');
+      console.log(postFormData);
+      //var postMessageUrl = 'https://slack.com/api/chat.postMessage?token='++'&channel='++'&text='+encodeURIComponent(message)+"&attachments="+encodeURIComponent(attachments);
+      return rp.post('https://slack.com/api/chat.postMessage', {form:postFormData});
     })
     .then( function(postMessageResponse){
-      console.log('Successfully sent message to Slack channel: ' + message);
-      return postMessageResponse;
+      postMessageResponse = JSON.parse(postMessageResponse);
+      if( postMessageResponse.ok ) {
+        console.log('Successfully sent message to Slack channel.');
+        console.log(postMessageResponse);
+        return "OK";
+      }
+      else{
+        throw postMessageResponse.error;
+      }
     })
     .catch( function(err){
-      console.log(err);
+      console.error(err);
       throw "Error: "+err;
     });
   }
