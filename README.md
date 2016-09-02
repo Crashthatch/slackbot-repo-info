@@ -5,13 +5,15 @@ Features:
 
 * Number of stars
 * Time of last Push
+* License
+* Age (First commit)
+* Number of Dependencies
+* Outdated / Deprecated dependencies
+
 
 TODO (Some using Libraries.io, maybe hook into gemnasium?):
 
-* License
-* Age (First commit)
 * Package managers this repo is release on (eg. "available on npm, bower") 
-* Number of Dependencies (or list all?)
 * Release Frequency
 * Number of regular contributors (Bus count)
 * Number of Transitive dependencies (how big is the dependency tree?)
@@ -26,6 +28,7 @@ TODO (Some using Libraries.io, maybe hook into gemnasium?):
 * A graph of health-ratings? A bad "red" dependency colours the tree that depends on it?
 * "Star on Github" button 
 * Test coverage (integrate with travis?)
+* Change colour of attachment sidebar by sending "color: #ff0000" in chat.postMessage. Red / orange / green for repo health.
 
 See [gorillamania/repo-health](https://github.com/gorillamania/repo-health), [repocheck](http://repocheck.com/), [gemnasium](https://gemnasium.com) and [npmCompare](https://npmcompare.com/compare/jasmine,mocha) for more ideas.
 

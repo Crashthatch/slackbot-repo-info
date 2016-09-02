@@ -198,6 +198,26 @@ describe('Slack', function() {
       })
     });
 
+    it('attachmentPosted.text contains the number of dependencies.', (done) => {
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+      //Wait for our lambda function to complete.
+      routerPromise.then( function(){
+        expect(attachmentPosted.text).toMatch(/25 dependencies/);
+        done();
+      });
+    });
+
+    it('attachmentPosted.text contains the number of outdated dependencies.', (done) => {
+      var routerPromise = app.router(testEvent, lambdaContextSpy);
+
+      //Wait for our lambda function to complete.
+      routerPromise.then( function(){
+        expect(attachmentPosted.text).toMatch(/9 outdated/);
+        done();
+      });
+    });
+
     it('attachmentPosted.text uses friendly dates.', (done) => {
       var routerPromise = app.router(testEvent, lambdaContextSpy);
 

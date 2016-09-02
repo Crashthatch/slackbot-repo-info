@@ -114,7 +114,28 @@ api.post('/slack/newMessage', function(req){
     })
     .then(function(librariesIoResponse){
       var librariesIoResponseData = JSON.parse(librariesIoResponse);
-      message += "\n License: "+librariesIoResponseData.license;
+      var deprecatedDependencies = librariesIoResponseData.dependencies.filter((d) => d.deprecated);
+      var outdatedDependencies = librariesIoResponseData.dependencies.filter((d) => d.outdated);
+      message += "\n License: "+librariesIoResponseData.license+", \n" +
+        librariesIoResponseData.dependencies.length+" dependencies";
+      if( deprecatedDependencies.length > 0 && outdatedDependencies.length > 0 ) {
+        if (deprecatedDependencies.length > 0) {
+          message += ", " + deprecatedDependencies.length + " deprecated"
+          if (deprecatedDependencies.length <= 3) {
+            message += ": " + deprecatedDependencies.map((d) => d.name).join(",") + ".\n";
+          }
+        }
+        if (outdatedDependencies.length > 0) {
+          message += ", " + outdatedDependencies.length + " outdated"
+          if (outdatedDependencies.length <= 3) {
+            message += ": " + outdatedDependencies.map((d) => d.name).join(",") + ".\n";
+          }
+        }
+      }
+      else{
+        message += ", all up to date";
+      }
+
 
       //Grab all bot_user_tokens for this team (generated and stored in DynamoDB when the bot was added to this team).
       //There may be more than 1 if multiple users have authorized the bot.
