@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk');
+const lambda = new AWS.Lambda();
 
 const https = require('https');
 const moment = require('moment');
@@ -60,7 +61,6 @@ api.get('/slack/oauth', function(req) {
 });
 
 api.post('/slack/newMessage', function(req){
-  //console.log(JSON.stringify(req));
 
   var postBody = req.body;
   if( postBody.token != req.env.slackVerificationToken ){
@@ -71,9 +71,59 @@ api.post('/slack/newMessage', function(req){
     return postBody['challenge'];
   }
 
-  if( postBody.event.text.includes('github.com/') ){
-    //TODO: Reply to Slack immediately. We will continue to process in the background.
-    // Think you need to use the req.lambdaContext object, and return a Promise that never gets resolved.
+  if( postBody.event.text.includes('github.com/') ) {
+    console.log("Calling sub-lambda function to process in the background.");
+    //Reply to Slack immediately. We will continue to process in the background.
+    var invokeOptions = {
+      FunctionName: req.lambdaContext.functionName, //call this lambda function
+      Qualifier: req.lambdaContext.functionVersion,
+      InvocationType: 'Event',
+      Payload: JSON.stringify({ doLongTask: true, originalReq: req})
+    };
+    console.log(JSON.stringify(invokeOptions));
+
+    return new Promise( //Must return a promise so that THIS function does not get cancelled before lambda.invoke finishes.
+      (resolve, reject) => {
+        lambda.invoke(
+          invokeOptions,
+          (err, done) => {
+            if (err) return reject(err);
+            resolve(done);
+          }
+        );
+      })
+      .then((invoked) => {
+        console.log('Sub-lambda invoked successfully')
+        return invoked;
+      })
+      .catch((ex) => {
+        console.error('Could not invoke sub-lambda.')
+        console.error(ex);
+        return 'Error invoking sub-lambda...\n ${ex.message}';
+      });
+  }
+
+});
+
+//api.intercept is called before other routes, so if a call came in but has doLongTask set, then do the long-running-task
+//and don't pass on to the regular handler.
+api.intercept(function(event){
+  console.log(JSON.stringify(event));
+  //If it's a regular call, from APIGateway, continue as usual.
+  if( !event.doLongTask ){
+    console.log('Regular call: Continuing as normal.');
+    return event;
+  }
+  else {
+    console.log('doLongTask is set. Starting process...');
+    return getInfoAndMakeSlackPost(event)
+    .then(() => false); // prevents normal execution
+  }
+});
+
+function getInfoAndMakeSlackPost(event){
+    var req = event.originalReq;
+    var postBody = req.body;
 
     //Extract the linked repo's path.
     var directoryParts = postBody.event.text.match(/github\.com\/([A-Za-z0-9_\.-]*)\/([A-Za-z0-9_\.-]*)/);
@@ -154,14 +204,14 @@ api.post('/slack/newMessage', function(req){
       var postFormData =
         "token=" + encodeURIComponent(dynamoDbResponse.Items[0].bot.bot_access_token) +
         "&channel=" + encodeURIComponent(postBody.event.channel) +
-        //"&text=" + encodeURIComponent(message) +
+          //"&text=" + encodeURIComponent(message) +
         "&attachments="+JSON.stringify([
           {
             "fallback": messageFallback,
             "title": repoFullName,
             "title_link": "https://github.com/" + repoOwner + "/" + repoName,
             "text": message,
-           // "image_url": "http://ichef-1.bbci.co.uk/news/660/cpsprodpb/978E/production/_90989783_doctorsstrike.jpg"
+            // "image_url": "http://ichef-1.bbci.co.uk/news/660/cpsprodpb/978E/production/_90989783_doctorsstrike.jpg"
           }
         ]);
       console.log('Posting message:');
@@ -184,5 +234,4 @@ api.post('/slack/newMessage', function(req){
       console.error(err);
       throw "Error: "+err;
     });
-  }
-});
+}

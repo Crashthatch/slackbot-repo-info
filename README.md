@@ -44,7 +44,7 @@ And [set up your AWS Credentials](https://claudiajs.com/tutorials/installing.htm
     
 To deploy to AWS Lambda / API Gateway:
 
-    claudia create --region us-east-1 --api-module app
+    claudia create --region us-east-1 --api-module app --timeout 20 --allow-recursion
     
 [Create a new Slack app](https://api.slack.com/apps/) . Use the URL claudia gave you in the last step, plus /slack/oauth as the "Request URL". (eg. https://123456789.execute-api.us-east-1.amazonaws.com/latest/slack/oauth)
 

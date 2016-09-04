@@ -8,26 +8,29 @@ const _ = require('lodash');
 var app = require('../app.js');
 
 var testEvent = {
-  context: {
-    path: '/slack/newMessage',
-    method: 'POST'
-  },
-  body: {
-    'token': 'SlackAppVerificationToken',
-    'type': 'message',
-    'event': {
-      text: 'http://github.com/octocat/hello-world'
+  doLongTask: true,
+  originalReq: {
+    context: {
+      path: '/slack/newMessage',
+      method: 'POST'
+    },
+    body: {
+      'token': 'SlackAppVerificationToken',
+      'type': 'message',
+      'event': {
+        text: 'http://github.com/octocat/hello-world'
+      }
+    },
+    env: {
+      slackClientId: 'SlackAppId',
+      slackClientSecret: 'SlackAppSecret',
+      slackVerificationToken: 'SlackAppVerificationToken',
+
+      librariesApiKey: 'librariesIoApiKey',
+
+      githubClientId: 'githubClientId',
+      githubClientSecret: 'gitHubClientSecret'
     }
-  },
-  env: {
-    slackClientId: 'SlackAppId',
-    slackClientSecret: 'SlackAppSecret',
-    slackVerificationToken: 'SlackAppVerificationToken',
-
-    librariesApiKey: 'librariesIoApiKey',
-
-    githubClientId: 'githubClientId',
-    githubClientSecret: 'gitHubClientSecret'
   }
 };
 
@@ -97,13 +100,13 @@ describe('Slack', function() {
 
     it('returns challenge if type is url_verification', function () {
       app.router({
-        context: testEvent.context,
+        context: testEvent.originalReq.context,
         body: {
           'type': 'url_verification',
           'challenge': 'I_SHOULD_BE_ECHOED',
           'token': 'SlackAppVerificationToken'
         },
-        env: testEvent.env
+        env: testEvent.originalReq.env
       }, lambdaContextSpy);
 
       expect(lambdaContextSpy.done).toHaveBeenCalledWith(null, 'I_SHOULD_BE_ECHOED');
@@ -111,7 +114,7 @@ describe('Slack', function() {
 
     it('Calls the Github API to get details for the right repo.', (done) => {
       var testEventModified = _.cloneDeep(testEvent);
-      testEventModified.body.event.text = 'http://github.com/octocat/hello-world';
+      testEventModified.originalReq.body.event.text = 'http://github.com/octocat/hello-world';
       var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
@@ -123,7 +126,7 @@ describe('Slack', function() {
 
     it('Recognises https:// github repos.', (done) => {
       var testEventModified = _.cloneDeep(testEvent);
-      testEventModified.body.event.text = 'https://github.com/octocat/hello-world';
+      testEventModified.originalReq.body.event.text = 'https://github.com/octocat/hello-world';
       var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
@@ -135,7 +138,7 @@ describe('Slack', function() {
 
     it('Recognises github repos without http:// at all.', (done) => {
       var testEventModified = _.cloneDeep(testEvent);
-      testEventModified.body.event.text = 'github.com/octocat/hello-world';
+      testEventModified.originalReq.body.event.text = 'github.com/octocat/hello-world';
       var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
@@ -147,7 +150,7 @@ describe('Slack', function() {
 
     it('Parses a github repo from the middle of a slack message.', (done) => {
       var testEventModified = _.cloneDeep(testEvent);
-      testEventModified.body.event.text = 'Hey everyone this is \"my\" more \n complicated message that also references a github repo. http://github.com/octocat/hello-world/blob/master/fonts/ionicons.ttf';
+      testEventModified.originalReq.body.event.text = 'Hey everyone this is \"my\" more \n complicated message that also references a github repo. http://github.com/octocat/hello-world/blob/master/fonts/ionicons.ttf';
       var routerPromise = app.router(testEventModified, lambdaContextSpy);
 
       routerPromise.then( function() {
@@ -168,6 +171,7 @@ describe('Slack', function() {
       })
     });
 
+    /*Removed because we no longer return anything from the background lambda process.
     it('returns a success', (done) => {
       var routerPromise = app.router(testEvent, lambdaContextSpy);
 
@@ -176,7 +180,7 @@ describe('Slack', function() {
         expect(lambdaContextSpy.done).toHaveBeenCalledWith(null, "OK"); //null as first argument means "success" (and causes API gateway to respond 200).
         done();
       })
-    });
+    });*/
 
     it('attachmentPosted.text Contains the number of stars the repo has.', (done) => {
       var routerPromise = app.router(testEvent, lambdaContextSpy);
