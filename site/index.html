@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="assets/img/favicon.png">
+
+    <title>Repository Info Slack Bot</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="assets/css/main.css" rel="stylesheet">
+
+    <!-- Fonts from Google Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Lato:300,400,900' rel='stylesheet' type='text/css'>
+    
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#"><b>Repo Info</b></a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+
+            <li>
+              <a href="https://slack.com/oauth/authorize?scope=bot&client_id=71297134288.73158498465">
+                <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" />
+              </a>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+  <div id="headerwrap">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6">
+          <h1>Get Info About Github <br/>
+          Repos Shared in Slack</h1>
+          <div style="margin-left: 145px; margin-bottom: 15px;">
+            <a href="https://slack.com/oauth/authorize?scope=bot&client_id=71297134288.73158498465">
+              <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" />
+            </a>
+          </div>
+        </div><!-- /col-lg-6 -->
+        <div class="col-lg-6">
+          <img class="img-responsive" src="assets/img/ipad-hand.png" alt="">
+        </div><!-- /col-lg-6 -->
+        
+      </div><!-- /row -->
+    </div><!-- /container -->
+  </div><!-- /headerwrap -->
+  
+  
+  <div class="container">
+    <div class="row mt centered">
+      <div class="col-lg-6 col-lg-offset-3">
+        <h1>Health Check for <br /> Github Libraries</h1>
+        <h3>Identify strengths and weaknesses of public Github libraries without leaving Slack.<br />
+          Spot red flags before adding a dependency you'll regret.</h3>
+      </div>
+    </div><!-- /row -->
+    
+    <div class="row mt centered">
+      <div class="col-lg-4">
+        <img src="assets/img/star.png" width="180" alt="">
+        <h4>1 - Stars, Watchers and Forks</h4>
+        <p>Repositories with more users are likely to have fewer bugs thanks to more extensive testing. <br />A low count here could be a warning sign.</p>
+      </div><!--/col-lg-4 -->
+
+      <div class="col-lg-4">
+        <img src="assets/img/ser02.png" width="180" alt="">
+        <h4>2 - Recent Activity</h4>
+        <p>We show repo age & last push time. If a library isn't actively developed, bug-fixes and security patches may be slow.</p>
+
+      </div><!--/col-lg-4 -->
+
+      <div class="col-lg-4">
+        <img src="assets/img/ser03.png" width="180" alt="">
+        <h4>3 - Dependencies Checking</h4>
+        <p>We warn when a library's dependencies are outdated, meaning poorer compatibility, and maybe security issues.<br />
+        22 package managers supported thanks to <a href="http://libraries.io">libraries.io</a></p>
+
+      </div><!--/col-lg-4 -->
+    </div><!-- /row -->
+  </div><!-- /container -->
+
+    <!--
+  <div class="container">
+    <hr>
+    <div class="row centered">
+      <div class="col-lg-6 col-lg-offset-3">
+        <form class="form-inline" role="form">
+          <div class="form-group">
+            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter your email address">
+          </div>
+          <button type="submit" class="btn btn-warning btn-lg">Invite Me!</button>
+        </form>          
+      </div>
+      <div class="col-lg-3"></div>
+    </div>
+    <hr>
+  </div> -->
+
+    <div class="container">
+      <hr>
+      <div class="row centered">
+        <div class="col-lg-6 col-lg-offset-3">
+          <a href="https://slack.com/oauth/authorize?scope=bot&client_id=71297134288.73158498465">
+            <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" />
+          </a>
+        </div>
+        <div class="col-lg-3"></div>
+      </div><!-- /row -->
+      <hr>
+    </div><!-- /container -->
+  
+  <div class="container">
+    <div class="row mt centered">
+      <div class="col-lg-6 col-lg-offset-3">
+        <h1>Get Started</h1>
+        <h3><a href="https://slack.com/oauth/authorize?scope=bot&client_id=71297134288.73158498465">Add to Slack</a>, then invite the @repo_info bot to the channels you want to monitor for github links.</h3>
+
+        <pre>/invite @repo_info #general</pre>
+
+        @repo_info bot will respond whenever someone links to a github repository.
+
+
+      </div>
+    </div><!-- /row -->
+  
+    <! -- CAROUSEL -->
+    <div class="row mt centered">
+      <div class="col-lg-6 col-lg-offset-3">
+        <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+          <!-- Indicators -->
+          <ol class="carousel-indicators">
+            <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+            <!--<li data-target="#carousel-example-generic" data-slide-to="1"></li>
+            <li data-target="#carousel-example-generic" data-slide-to="2"></li>-->
+          </ol>
+        
+          <!-- Wrapper for slides -->
+          <div class="carousel-inner">
+            <div class="item active">
+              <img src="assets/img/repo-screenshot1.png" alt="" style="margin: auto;">
+            </div>
+            <!--<div class="item">
+              <img src="assets/img/p02.png" alt="">
+            </div>
+            <div class="item">
+              <img src="assets/img/p03.png" alt="">
+            </div>-->
+          </div>
+        </div>      
+      </div><!-- /col-lg-8 -->
+    </div><!-- /row -->
+  </div><! --/container -->
+
+  <div class="container">
+    <hr>
+    <div class="row mt centered">
+      <div class="col-lg-6 col-lg-offset-3">
+        <h1>About</h1>
+        <h4>Repo Info was created for the AWS Serverless Slackbot Competition by <a href="https://twitter.com/thomasfletcher">@thomasfletcher</a>. It uses <a href="https://github.com/claudiajs/claudia">Claudia.js</a> and <a href="https://aws.amazon.com/lambda/">AWS Lambda</a> to provide a slack bot that listens to <a href="https://api.slack.com/events-api">Slack Events</a> and operates scalably without servers.<BR />
+          <BR />
+          Data comes from the <a href="https://developer.github.com/">Github API</a> and <a href="https://libraries.io/api">Libraries.io API</a>.</h4>
+
+        <BR />
+        <a class="github-button" href="https://github.com/Crashthatch/slackbot-repo-info" data-icon="octicon-star" data-style="mega" data-count-href="/Crashthatch/slackbot-repo-info/stargazers" data-count-api="/repos/Crashthatch/slackbot-repo-info#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star Crashthatch/slackbot-repo-info on GitHub">Star</a>
+      </div>
+    </div><!-- /row -->
+    
+    <!--<div class="row mt centered">
+      <div class="col-lg-4">
+        <img class="img-circle" src="assets/img/pic1.jpg" width="140" alt="">
+        <h4>Michael Robson</h4>
+        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.</p>
+        <p><i class="glyphicon glyphicon-send"></i> <i class="glyphicon glyphicon-phone"></i> <i class="glyphicon glyphicon-globe"></i></p>
+      </div>
+
+      <div class="col-lg-4">
+        <img class="img-circle" src="assets/img/pic2.jpg" width="140" alt="">
+        <h4>Pete Ford</h4>
+        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.</p>
+        <p><i class="glyphicon glyphicon-send"></i> <i class="glyphicon glyphicon-phone"></i> <i class="glyphicon glyphicon-globe"></i></p>
+      </div>
+
+      <div class="col-lg-4">
+        <img class="img-circle" src="assets/img/pic3.jpg" width="140" alt="">
+        <h4>Angelica Finning</h4>
+        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.</p>
+        <p><i class="glyphicon glyphicon-send"></i> <i class="glyphicon glyphicon-phone"></i> <i class="glyphicon glyphicon-globe"></i></p>
+      </div>
+    </div>-->
+  </div><!-- /container -->
+  
+  <div class="container">
+    <hr>
+    <div class="row centered">
+      <div class="col-lg-6 col-lg-offset-3">
+        <a href="https://slack.com/oauth/authorize?scope=bot&client_id=71297134288.73158498465">
+          <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" />
+        </a>
+      </div>
+      <div class="col-lg-3"></div>
+    </div><!-- /row -->
+    <hr>
+    <p class="centered">Created by <a href="https://twitter.com/thomasfletcher">@thomasfletcher</a>.<BR />
+      <a href="https://github.com/Crashthatch/slackbot-repo-info">Source on Github</a>
+    </p>
+  </div><!-- /container -->
+  
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+  </body>
+</html>
