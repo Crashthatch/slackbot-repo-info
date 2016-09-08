@@ -88,7 +88,9 @@ Click this button and complete the oAuth process, selecting a slack team & chann
 
 To test, paste a link to a github repository into the slack channel, and the bot should reply with info about the linked repository.
 
-##Debugging
+##Updating & Debugging
+Run ```claudia update``` to build & upload the latest version of the code to lambda / Gateway.
+
 Production logs are available through the [Cloudwatch console](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logs:). Select your lambda function log-group and the latest deployment and look for errors.
 
 ##Test Locally

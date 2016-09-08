@@ -55,7 +55,7 @@ api.get('/slack/oauth', function(req) {
   success: {
     code: 301,
     headers: {
-      Location: "http://google.com"
+      Location: "http://gitrepo.info/added.html"
     }
   }
 });
