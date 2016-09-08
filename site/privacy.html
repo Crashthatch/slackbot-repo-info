@@ -59,11 +59,39 @@
 <div class="container" style="padding-top: 80px;">
     <div class="row mt centered">
         <div class="col-lg-6 col-lg-offset-3">
-            <h1>Success!</h1>
-            <h3>You have added the Repo Info bot to your Slack team.<BR />
-            You should invite the @repo_info user to the channels where you want to see info about linked repositories.</h3>
+            <h1>Privacy Policy</h1>
 
-            <pre>/invite @repo_info #general</pre>
+            <p>We store your team's ID & name, the installing user's ID, and a couple of access tokens so that we can correctly listen for mentions of github repositories and make sure that the bot can post a message back to the right channel.
+            </p>
+
+            <p>The full details stored look something like:</p>
+
+            <pre style="text-align: left;">
+{
+  "access_token": "xoxp-0123456789-xxxxxxxxxxx-1234567890-xxxxxxxxx",
+  "bot": {
+    "bot_access_token": "xoxp-0123456789-xxxxxxxxxxx-1234567890-xxxxxxxxx",
+    "bot_user_id": "U29NVXXXX"
+  },
+  "ok": true,
+  "scope": "identify,bot",
+  "team_id": "T06QXXX99",
+  "team_name": "Tom's Test",
+  "user_id": "U06QX9XXX"
+}
+            </pre>
+
+            <p>Messages received from Slack are received, scanned for which github repository is being immediately discarded and not stored .</p>
+
+            <p>Only channels which you have invited the @slack_repo bot to are monitored (The bot can only see what it's been invited to see). Slack doesn't even send us information about other channels.</p>
+
+            <p>We do not send any team/user specific information to anyone else. We use various APIs (Github, Libraries.io, etc.) to gather information about github repos, but the only information we need to give them is the name of the repo we want info about.</p>
+
+            <p>In the case of an internal error, we may store the github repo URL & the slack message that caused the error so that we can investigate.</p>
+
+            <p>To be honest, it would be more hassle and cost for us to read and store your messages, so it's easier (& securer) for us to just get rid of them as soon as we can (typically, messages don't ever get stored on a hard-disk, so they go away once the lambda function finishes processing and is terminated).</p>
+
+            <p>The Repo Info bot is <a href="https://github.com/Crashthatch/slackbot-repo-info">Open Source</a> if you would like to check for yourself.</p>
         </div>
     </div><!-- /row -->
 </div>
@@ -72,7 +100,6 @@
     <hr>
     <div class="row centered">
         <div class="col-lg-6 col-lg-offset-3">
-            Add to another team:<BR />
             <a href="https://slack.com/oauth/authorize?scope=bot&client_id=71297134288.73158498465">
                 <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" />
             </a>
