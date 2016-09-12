@@ -1,1 +1,60 @@
-{"error":"404 Not Found"}
+{
+  "name": "StatusCodeError",
+  "statusCode": 404,
+  "message": "404 - \"{\\\"error\\\":\\\"404 Not Found\\\"}\"",
+  "error": "{\"error\":\"404 Not Found\"}",
+  "options": {
+    "uri": "https://libraries.io/api/github/BathHacked/energy-sparks/dependencies?api_key=0e85a1074ec6ea569f8719da6973aaeb",
+    "method": "GET",
+    "simple": true,
+    "resolveWithFullResponse": false,
+    "transform2xxOnly": false
+  },
+  "response": {
+    "statusCode": 404,
+    "body": "{\"error\":\"404 Not Found\"}",
+    "headers": {
+      "date": "Mon, 12 Sep 2016 22:51:18 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "set-cookie": [
+        "__cfduid=d5e628c7f50e80a82a9ad0d883acb8d3f1473720677; expires=Tue, 12-Sep-17 22:51:17 GMT; path=/; domain=.libraries.io; HttpOnly",
+        "_libraries_session=b1dIMWpOeE1nS3J0T2huclFYd2NHUjU0WTIyMC9JUkR0T0U2MWZSRVNvRlVQNlFqR1l3U216K2JDQy9LRTdxWkg1emZ1RXRkNmVOd2lwUC8yK3pRQnFScjJJRXFKRm00ZVFGVFozanQrT1d3V3FzamlkYzVMZklITFdkbzl3ZW5tYTIwaWg2dHpzQ25MTDRENU9xMThTeGNseTk4ZnVSbTJRTS9OUVhzeWZ0aFJxNmFVcmNJMkgwQnREY1hJUVQ2LS0vbUtKaVFiQ3dWM2JmVDA0dHhOdSt3PT0%3D--2d4a7040320552215b46fde7d448265fc708b540; path=/; expires=Wed, 12 Oct 2016 22:51:18 -0000; HttpOnly"
+      ],
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "1; mode=block",
+      "x-content-type-options": "nosniff",
+      "access-control-allow-origin": "*",
+      "access-control-expose-headers": "ETag",
+      "access-control-allow-methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD",
+      "access-control-allow-headers": "*,x-requested-with,Content-Type,If-Modified-Since,If-None-Match",
+      "access-control-max-age": "86400",
+      "x-ratelimit-limit": "60",
+      "x-ratelimit-remaining": "59",
+      "cache-control": "no-cache",
+      "x-request-id": "4d26e214-d012-4aa2-bf61-0e237b036865",
+      "x-runtime": "0.019918",
+      "server": "cloudflare-nginx",
+      "cf-ray": "2e16ec5d78c723ae-IAD"
+    },
+    "request": {
+      "uri": {
+        "protocol": "https:",
+        "slashes": true,
+        "auth": null,
+        "host": "libraries.io",
+        "port": 443,
+        "hostname": "libraries.io",
+        "hash": null,
+        "search": "?api_key=0e85a1074ec6ea569f8719da6973aaeb",
+        "query": "api_key=0e85a1074ec6ea569f8719da6973aaeb",
+        "pathname": "/api/github/BathHacked/energy-sparks/dependencies",
+        "path": "/api/github/BathHacked/energy-sparks/dependencies?api_key=0e85a1074ec6ea569f8719da6973aaeb",
+        "href": "https://libraries.io/api/github/BathHacked/energy-sparks/dependencies?api_key=0e85a1074ec6ea569f8719da6973aaeb"
+      },
+      "method": "GET",
+      "headers": {}
+    }
+  }
+}

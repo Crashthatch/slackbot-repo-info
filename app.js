@@ -190,7 +190,7 @@ function getInfoAndMakeSlackPost(event){
     })
     .catch( function librariesIoFailed(err){
       //Do nothing particularly.
-      console.error("Failed call to Libraries.io: "+err);
+      console.error("Failed call to Libraries.io: "+err.message);
       console.error(JSON.stringify(err));
     })
     .then(function(){

@@ -52,7 +52,7 @@ beforeEach(function() {
       return Promise.resolve(githubRepoResponse);
     }
     else if(urlRequested.match(/^https:\/\/libraries.io\/api\/github\/notalibrary\/librariesdoesntknow\/dependencies/)){
-      return Promise.reject(librariesIo404);
+      return Promise.reject(JSON.parse(librariesIo404));
     }
     else if(urlRequested.match(/^https:\/\/libraries.io\/api\/github\/.*\/dependencies/)){
       return Promise.resolve(librariesIoDependenciesResponse);
