@@ -36,6 +36,7 @@ var testEvent = {
 
 var githubRepoResponse = fs.readFileSync('spec/githubRepoResponse.json').toString();
 var librariesIoDependenciesResponse = fs.readFileSync('spec/librariesIoDependenciesResponse.json').toString();
+var librariesIo404 = fs.readFileSync('spec/librariesIo404.json').toString();
 
 
 var lambdaContextSpy, getAjaxSpy, postAjaxSpy, dynamoDbSpy, attachmentPosted;
@@ -49,6 +50,9 @@ beforeEach(function() {
 
     if (urlRequested.match(/^https:\/\/api\.github\.com\/repos/)) {
       return Promise.resolve(githubRepoResponse);
+    }
+    else if(urlRequested.match(/^https:\/\/libraries.io\/api\/github\/notalibrary\/librariesdoesntknow\/dependencies/)){
+      return Promise.reject(librariesIo404);
     }
     else if(urlRequested.match(/^https:\/\/libraries.io\/api\/github\/.*\/dependencies/)){
       return Promise.resolve(librariesIoDependenciesResponse);
@@ -166,6 +170,21 @@ describe('Slack', function() {
       //Wait for our lambda function to complete.
       routerPromise.then( function(){
         expect(postAjaxSpy).toHaveBeenCalled();
+        expect(attachmentPosted.title).toMatch(/octocat\/hello-world/i);
+        done();
+      })
+    });
+
+    it('Posts to Slack, even when response from libraries.io fails.', (done) => {
+      var testEventModified = _.cloneDeep(testEvent);
+      testEventModified.originalReq.body.event.text = 'http://github.com/notalibrary/librariesdoesntknow';
+
+      var routerPromise = app.router(testEventModified, lambdaContextSpy);
+
+      //Wait for our lambda function to complete.
+      routerPromise.then( function(){
+        expect(postAjaxSpy).toHaveBeenCalled();
+        expect(attachmentPosted).not.toBeNull();
         expect(attachmentPosted.title).toMatch(/octocat\/hello-world/i);
         done();
       })

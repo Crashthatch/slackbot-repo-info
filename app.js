@@ -187,6 +187,15 @@ function getInfoAndMakeSlackPost(event){
       }
 
 
+    })
+    .catch( function librariesIoFailed(err){
+      //Do nothing particularly.
+      console.error("Failed call to Libraries.io: "+err);
+      console.error(JSON.stringify(err));
+    })
+    .then(function(){
+      console.log('Getting tokens from DynamoDB...');
+
       //Grab all bot_user_tokens for this team (generated and stored in DynamoDB when the bot was added to this team).
       //There may be more than 1 if multiple users have authorized the bot.
       const DBDocClient = Promise.promisifyAll(new AWS.DynamoDB.DocumentClient());
