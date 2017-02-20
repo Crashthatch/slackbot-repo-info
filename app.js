@@ -147,7 +147,7 @@ function getInfoAndMakeSlackPost(event){
 
       message = //">>> *"+repoFullName+"*: \n" +
         githubApiData.stargazers_count + ":star:   " +
-        githubApiData.watchers_count + " :eye:   " +
+        githubApiData.subscribers_count + " :eye:   " +
         githubApiData.forks_count + " :fork_and_knife: " +
         "Created: " + moment(githubApiData.created_at).fromNow() + ", " +
         "Last push: " + moment(githubApiData.pushed_at).fromNow();
@@ -155,7 +155,7 @@ function getInfoAndMakeSlackPost(event){
       //Fallback message without emojis for readers that can't display formatting (eg. IRC).
       messageFallback = repoFullName + " has " +
         githubApiData.stargazers_count + " stars, " +
-        githubApiData.watchers_count + " watchers " +
+        githubApiData.subscribers_count + " watchers " +
         "and " + githubApiData.forks_count + " forks. " +
         "It was created " + moment(githubApiData.created_at).fromNow() +
         " and last pushed to " + moment(githubApiData.pushed_at).fromNow();
