@@ -4,7 +4,8 @@
   "description": "A bot that listens to Slack and gives information about linked git repos.",
   "main": "index.js",
   "scripts": {
-    "test": "node jasmine-runner.js"
+    "test": "node jasmine-runner.js",
+    "deploy": "claudia update"
   },
   "author": "tom fletcher",
   "license": "MIT",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "jasmine": "^2.4.1",
-    "jasmine-spec-reporter": "^2.7.0"
+    "jasmine-spec-reporter": "^2.7.0",
+    "claudia": "1.9.0"
   }
 }
